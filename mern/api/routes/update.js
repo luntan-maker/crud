@@ -4,13 +4,13 @@ const {MongoClient} = require('mongodb')
 require('dotenv').config()
 
 
-router.get('/', async function(req, res, next) {
+router.put('/', async function(req, res, next) {
     const uri = process.env.DB_URI
     const client = new MongoClient(uri);
     try {    
         await client.connect();
-        var docs = await getAllListings(client)
-        res.send(docs)
+        await updateListing(client, req.query.title, {testing: req.query.replace})
+        res.send("okay")
     } catch (e) {
         console.log(e)
     } finally {
@@ -21,14 +21,7 @@ router.get('/', async function(req, res, next) {
 
 module.exports = router;
 
-async function getAllListings(client) {
-    
-    var arr = []
-    const bobo = await client.db("todo").collection("todo").find().forEach(function(doc) {
-        arr.push(doc)
-    }
-    )
-    return arr
-
+async function updateListing(client, nameOfListing, updatedListing) {
+    const result = await client.db("todo").collection("todo").updateOne({testing: nameOfListing}, {$set: updatedListing})
     
 }

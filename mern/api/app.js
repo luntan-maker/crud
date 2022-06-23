@@ -8,6 +8,7 @@ var indexRouter = require('./routes/index');
 var createRouter = require('./routes/create');
 var deleteRouter = require('./routes/delete');
 var readRouter = require('./routes/read');
+var updateRouter = require('./routes/update');
 
 var app = express();
 
@@ -25,6 +26,7 @@ app.use('/', indexRouter);
 app.use('/create', createRouter);
 app.use('/delete', deleteRouter);
 app.use('/read', readRouter);
+app.use('/update', updateRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
