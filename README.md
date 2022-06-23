@@ -1,0 +1,1 @@
+A basic collection of crud applications using different tech stacks of varying quality.
