@@ -46,7 +46,7 @@ function App() {
 function TodoRow(props) {
   return (
     <div>
-      <input type="checkbox" onChange={changeText}/>
+      <input type="checkbox" id="check" onChange={changeText}/>
       <label id="name">{props.name}</label>
       <button onClick={changeRow}>Change</button>
       <button onClick={deleteRow}>Delete</button>
@@ -54,15 +54,6 @@ function TodoRow(props) {
   )
 }
 
-function TodoInput(){
-  return (
-    <div>
-      <input/>
-      <button onClick={submitInput}>Submit</button>
-      <button onClick={cancelInput}>Cancel</button>
-    </div>
-  )
-}
 function addOne(){
   
   var addOne = document.getElementById("addOneSpot");
@@ -98,9 +89,9 @@ function addOne(){
     check.type = "checkbox";
     label.id = "name";
     label.innerText = textOf;
-    changeBtn.addEventListener("click", changeRow(event));
+    changeBtn.addEventListener("click", changeRow);
     changeBtn.innerText = "Change";
-    deleteBtn.addEventListener("click", deleteRow(event));
+    deleteBtn.addEventListener("click", deleteRow);
     deleteBtn.innerText = "Delete";
 
     divOf.appendChild(check);
@@ -136,9 +127,103 @@ function changeText(event){
 }
 function changeRow(event){
   // Change the ui to change the row
+  // Replace the insides with an input and a submit and cancel button
+  // Submit button sends information to database and recreates the entry
+  // Cancel recreates the previous row
   var parent = event.target.parentNode
+  // console.log(parent);
+  var originalValue = parent.querySelector("#name").innerText;
+  var checkedBox = parent.querySelector("#check").checked;
+  parent.innerHTML="";
+
+  var input = document.createElement("input");
+  input.id = "input";
+  var submitBtn = document.createElement("button");
+  submitBtn.disabled = true;
+  var cancelBtn = document.createElement("button");
+
+  submitBtn.innerText = "Submit";
+  submitBtn.id = "submit";
+  cancelBtn.innerText = "Cancel";
+
+  input.addEventListener("keypress", (event)=> {
+    var button = event.target.parentNode.querySelector("#submit");
+    var inp = event.target.parentNode.querySelector("#input");
+    console.log(inp.value)
+    if (inp.value.length<1){
+      button.disabled = true;
+    } else {
+      button.disabled = false;
+    }
+  })
+
+  submitBtn.addEventListener("click", async (event)=>{
+
+    await fetch("http://localhost:3000/update?title="+originalValue+"&replace="+input.value, {method:"PUT", mode:'cors'});
+
+
+    parent = event.target.parentNode;
+    
+    var originalInput = document.createElement("input")
+    var originalLabel = document.createElement("label")
+    var originalChangeBtn = document.createElement("button");
+    var originalDeleteBtn = document.createElement("button");
+
+    originalInput.type = "checkbox";
+    // originalInput.checked = false;
+    originalInput.id = "check";
+
+    originalLabel.id = "name";
+    originalLabel.innerText = input.value;
+
+    originalChangeBtn.addEventListener("click", changeRow)
+    originalChangeBtn.innerText = "Change";
+    
+    originalDeleteBtn.addEventListener("click", deleteRow);
+    originalDeleteBtn.innerText = "Delete";
+
+
+    parent.innerHTML="";
+    parent.appendChild(originalInput);
+    parent.appendChild(originalLabel);
+    parent.appendChild(originalChangeBtn);
+    parent.appendChild(originalDeleteBtn);
+  })
+
+  cancelBtn.addEventListener("click", (event)=>{
+    parent = event.target.parentNode;
+    
+    var originalInput = document.createElement("input")
+    var originalLabel = document.createElement("label")
+    var originalChangeBtn = document.createElement("button");
+    var originalDeleteBtn = document.createElement("button");
+
+    originalInput.type = "checkbox";
+    originalInput.checked = checkedBox;
+    originalInput.id = "check";
+    originalInput.addEventListener("change", changeText);
+
+    originalLabel.id = "name";
+    originalLabel.innerText = originalValue;
+
+    originalChangeBtn.addEventListener("click", changeRow)
+    originalChangeBtn.innerText = "Change";
+
+    originalDeleteBtn.addEventListener("click", deleteRow);
+    originalDeleteBtn.innerText = "Delete";
+
+
+    parent.innerHTML="";
+    parent.appendChild(originalInput);
+    parent.appendChild(originalLabel);
+    parent.appendChild(originalChangeBtn);
+    parent.appendChild(originalDeleteBtn);
+  })
+
+  parent.appendChild(input);
+  parent.appendChild(submitBtn);
+  parent.appendChild(cancelBtn);
   
-  console.log("Hello");
 }
 async function deleteRow(event){
   // Remove the component and delete from db
@@ -150,16 +235,5 @@ async function deleteRow(event){
   parent.innerHTML="";
   
 }
-function submitInput(event){
-  // Add to ui and db
-  var parent = event.target.parentNode
-
-  console.log(parent);
-}
-function cancelInput(){
-  // Simply remove from ui
-  console.log("Hello");
-}
-
 
 export default App;
